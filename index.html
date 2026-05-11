@@ -1,0 +1,448 @@
+
+<h2 class="sr-only">The Sunken Tithe — Interactive DM Reference Screen for D&D 5e</h2>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.dm-screen { padding: 1rem 0; }
+.header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; border-bottom: 0.5px solid var(--color-border-tertiary); padding-bottom: 1rem; }
+.header-icon { font-size: 28px; }
+.header-title { font-size: 22px; font-weight: 500; color: var(--color-text-primary); }
+.header-sub { font-size: 13px; color: var(--color-text-secondary); margin-top: 2px; }
+
+.tab-bar { display: flex; gap: 4px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+.tab { padding: 6px 14px; font-size: 13px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); cursor: pointer; background: transparent; color: var(--color-text-secondary); transition: all 0.15s; }
+.tab:hover { background: var(--color-background-secondary); color: var(--color-text-primary); }
+.tab.active { background: var(--color-background-secondary); border-color: var(--color-border-primary); color: var(--color-text-primary); font-weight: 500; }
+
+.panel { display: none; }
+.panel.active { display: block; }
+
+.card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin-bottom: 12px; }
+.card-title { font-size: 14px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.04em; font-size: 11px; }
+
+.npc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.npc-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem; }
+.npc-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.npc-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: 13px; flex-shrink: 0; }
+.npc-name { font-weight: 500; font-size: 14px; color: var(--color-text-primary); }
+.npc-role { font-size: 12px; color: var(--color-text-secondary); }
+.detail-row { font-size: 13px; color: var(--color-text-secondary); padding: 4px 0; border-top: 0.5px solid var(--color-border-tertiary); display: flex; gap: 8px; align-items: flex-start; }
+.detail-row i { margin-top: 2px; flex-shrink: 0; }
+.detail-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-tertiary); margin-top: 2px; }
+
+.room-btn { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 10px 14px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); background: transparent; cursor: pointer; margin-bottom: 6px; transition: background 0.15s; font-family: var(--font-sans); }
+.room-btn:hover { background: var(--color-background-secondary); }
+.room-btn.open { background: var(--color-background-secondary); border-color: var(--color-border-secondary); }
+.room-num { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; flex-shrink: 0; }
+.room-name { font-size: 14px; font-weight: 500; color: var(--color-text-primary); flex: 1; }
+.room-tag { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+.room-detail { display: none; padding: 10px 14px 14px; margin-top: -6px; margin-bottom: 6px; border: 0.5px solid var(--color-border-tertiary); border-top: none; border-radius: 0 0 var(--border-radius-md) var(--border-radius-md); background: var(--color-background-secondary); }
+.room-detail.open { display: block; }
+.detail-section { margin-bottom: 10px; }
+.detail-section-title { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-tertiary); margin-bottom: 4px; }
+.detail-section p { font-size: 13px; color: var(--color-text-secondary); line-height: 1.6; }
+
+.stat-block { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin-bottom: 12px; }
+.stat-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.stat-icon { font-size: 20px; }
+.enemy-name { font-size: 16px; font-weight: 500; color: var(--color-text-primary); }
+.stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
+.stat-cell { text-align: center; padding: 8px 4px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); }
+.stat-cell-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-tertiary); font-weight: 500; }
+.stat-cell-val { font-size: 18px; font-weight: 500; color: var(--color-text-primary); margin-top: 2px; }
+.ability-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.ability-badge { font-size: 12px; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+.ability-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 2px; }
+.ability-desc { font-size: 13px; color: var(--color-text-secondary); line-height: 1.55; margin-bottom: 6px; }
+
+.hp-tracker { display: flex; align-items: center; gap: 10px; margin-top: 8px; padding-top: 8px; border-top: 0.5px solid var(--color-border-tertiary); }
+.hp-label { font-size: 12px; color: var(--color-text-secondary); font-weight: 500; }
+.hp-display { font-size: 18px; font-weight: 500; min-width: 32px; text-align: center; }
+.hp-btn { width: 28px; height: 28px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); background: transparent; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; color: var(--color-text-primary); font-family: var(--font-sans); transition: background 0.1s; }
+.hp-btn:hover { background: var(--color-background-secondary); }
+.hp-input { width: 48px; padding: 3px 6px; font-size: 13px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); text-align: center; font-family: var(--font-sans); background: transparent; color: var(--color-text-primary); }
+.hp-set-btn { font-size: 12px; padding: 3px 8px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); background: transparent; cursor: pointer; color: var(--color-text-secondary); font-family: var(--font-sans); }
+.hp-set-btn:hover { background: var(--color-background-secondary); }
+
+.loot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.loot-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem; }
+.loot-icon { font-size: 22px; margin-bottom: 6px; }
+.loot-name { font-size: 14px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
+.loot-desc { font-size: 13px; color: var(--color-text-secondary); line-height: 1.55; }
+.loot-note { font-size: 12px; color: var(--color-text-warning); margin-top: 6px; font-style: italic; }
+
+.tip-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin-bottom: 12px; }
+.tip-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.tip-icon { font-size: 18px; color: var(--color-text-warning); }
+.tip-title { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+.tip-body { font-size: 13px; color: var(--color-text-secondary); line-height: 1.6; }
+.tip-body li { margin-left: 16px; margin-bottom: 4px; }
+
+.read-aloud { background: var(--color-background-secondary); border-left: 2px solid var(--color-border-secondary); border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0; padding: 10px 14px; font-size: 13px; color: var(--color-text-secondary); line-height: 1.7; font-style: italic; margin-bottom: 12px; }
+
+.badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+.badge-danger { background: #FCEBEB; color: #A32D2D; }
+.badge-warning { background: #FAEEDA; color: #854F0B; }
+.badge-info { background: #E6F1FB; color: #185FA5; }
+.badge-success { background: #EAF3DE; color: #3B6D11; }
+.badge-neutral { background: var(--color-background-secondary); color: var(--color-text-secondary); border: 0.5px solid var(--color-border-tertiary); }
+
+.dc-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; padding: 2px 8px; border-radius: 20px; font-weight: 500; background: #FAEEDA; color: #854F0B; margin-right: 4px; }
+
+.flavor-btn { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; padding: 4px 10px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); background: transparent; cursor: pointer; color: var(--color-text-secondary); font-family: var(--font-sans); margin-top: 8px; transition: background 0.1s; }
+.flavor-btn:hover { background: var(--color-background-secondary); }
+</style>
+
+<div class="dm-screen">
+  <div class="header">
+    <span class="header-icon"><i class="ti ti-map" style="font-size:26px; color: var(--color-text-secondary);" aria-hidden="true"></i></span>
+    <div>
+      <div class="header-title">The Sunken Tithe</div>
+      <div class="header-sub">DM Reference &nbsp;·&nbsp; D&D 5e &nbsp;·&nbsp; Levels 2–3 &nbsp;·&nbsp; 3–4 hrs &nbsp;·&nbsp; 4 players</div>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab active" onclick="showTab('briefing')"><i class="ti ti-book" aria-hidden="true"></i> Briefing</button>
+    <button class="tab" onclick="showTab('npcs')"><i class="ti ti-users" aria-hidden="true"></i> NPCs</button>
+    <button class="tab" onclick="showTab('rooms')"><i class="ti ti-map-pin" aria-hidden="true"></i> Rooms</button>
+    <button class="tab" onclick="showTab('combat')"><i class="ti ti-sword" aria-hidden="true"></i> Combat</button>
+    <button class="tab" onclick="showTab('loot')"><i class="ti ti-diamond" aria-hidden="true"></i> Loot</button>
+    <button class="tab" onclick="showTab('tips')"><i class="ti ti-bulb" aria-hidden="true"></i> Emergency</button>
+  </div>
+
+  <!-- BRIEFING -->
+  <div class="panel active" id="panel-briefing">
+    <div class="card">
+      <div class="card-title">Read aloud to players</div>
+      <div class="read-aloud">"The well of Bormir has been dry for three days, and the villagers are desperate. Where water once flowed, a crumbling stone staircase now descends into darkness — slick with algae, smelling of old rain and something older still. The village elder presses a rusted iron key into your hands and whispers: 'Whatever the temple wants, give it back.'"</div>
+    </div>
+    <div class="card">
+      <div class="card-title">What's really going on</div>
+      <p style="font-size:13px; color: var(--color-text-secondary); line-height:1.65;">Dag Ironboot cracked the well wall with shoddy repairs, draining water into the ancient temple below and destabilizing a magical seal. Marta's late husband's gold idol now jams the valve. The temple predates Brother Coyne's religion entirely — and something inside is watching.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Session goal</div>
+      <p style="font-size:13px; color: var(--color-text-secondary); line-height:1.65;">Descend the dry well, navigate the drowned temple, unblock the valve (returning the idol), and optionally appease — or defeat — the Keeper of the Tithe in the Inner Sanctum.</p>
+    </div>
+  </div>
+
+  <!-- NPCS -->
+  <div class="panel" id="panel-npcs">
+    <div class="npc-grid">
+      <div class="npc-card">
+        <div class="npc-header">
+          <div class="npc-avatar" style="background:#FBEAF0; color:#99355A;">MA</div>
+          <div><div class="npc-name">Marta Ashfeld</div><div class="npc-role">Miller's widow</div></div>
+        </div>
+        <div class="detail-row"><i class="ti ti-masks-theater" style="font-size:14px;" aria-hidden="true"></i><div><div class="detail-label">Quirk</div>Never stops wringing a rag in her hands.</div></div>
+        <div class="detail-row"><i class="ti ti-lock" style="font-size:14px;" aria-hidden="true"></i><div><div class="detail-label">Secret</div>She threw her late husband's gold idol into the well during a grief-mad night. It's blocking the valve.</div></div>
+        <div class="detail-row"><i class="ti ti-gift" style="font-size:14px;" aria-hidden="true"></i><div><div class="detail-label">Offers</div>Hand-drawn map of rooms 1–2 (auto-success on valve puzzle).</div></div>
+      </div>
+      <div class="npc-card">
+        <div class="npc-header">
+          <div class="npc-avatar" style="background:#E6F1FB; color:#185FA5;">BC</div>
+          <div><div class="npc-name">Brother Coyne</div><div class="npc-role">Young priest</div></div>
+        </div>
+        <div class="detail-row"><i class="ti ti-masks-theater" style="font-size:14px;" aria-hidden="true"></i><div><div class="detail-label">Quirk</div>Anxious; sweats constantly.</div></div>
+        <div class="detail-row"><i class="ti ti-lock" style="font-size:14px;" aria-hidden="true"></i><div><div class="detail-label">Secret</div>The temple predates his religion. He's terrified his god has no power here.</div></div>
+        <div class="detail-row"><i class="ti ti-gift" style="font-size:14px;" aria-hidden="true"></i><div><div class="detail-label">Offers</div>2× Potions of Water Breathing (1 hr each) · Blessing: +1 to first death save.</div></div>
+      </div>
+      <div class="npc-card">
+        <div class="npc-header">
+          <div class="npc-avatar" style="background:#EAF3DE; color:#3B6D11;">DI</div>
+          <div><div class="npc-name">Dag Ironboot</div><div class="npc-role">Dwarven well-digger</div></div>
+        </div>
+        <div class="detail-row"><i class="ti ti-masks-theater" style="font-size:14px;" aria-hidden="true"></i><div><div class="detail-label">Quirk</div>Half-deaf, speaks too loud.</div></div>
+        <div class="detail-row"><i class="ti ti-lock" style="font-size:14px;" aria-hidden="true"></i><div><div class="detail-label">Secret (guilty!)</div>He cracked the well wall a month ago — the cause of all of this.</div></div>
+        <div class="detail-row"><i class="ti ti-gift" style="font-size:14px;" aria-hidden="true"></i><div><div class="detail-label">Offers</div>50 ft hemp rope · Miner's pick · Key tip: "It's Thornite — pressure-sensitive, don't hammer it!"</div></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:4px;">
+      <div class="card-title">Bonus NPC — Pell Quickwick</div>
+      <p style="font-size:13px; color: var(--color-text-secondary); line-height:1.65;">A halfling explorer who descended the well two days ago, now hiding on a ledge in the Hall of Offerings (Room 2), starving. Has one useful clue and one wild theory. Deploy if the party is bored or disengaged — instant energy.</p>
+    </div>
+  </div>
+
+  <!-- ROOMS -->
+  <div class="panel" id="panel-rooms">
+    <div id="room1-btn" class="room-btn" onclick="toggleRoom(1)">
+      <div class="room-num" style="background:#FAEEDA; color:#854F0B; font-weight:500;">1</div>
+      <span class="room-name"><i class="ti ti-wall" style="font-size:14px; margin-right:4px;" aria-hidden="true"></i>The Muddy Descent</span>
+      <span class="room-tag badge-warning">Athletics DC 12</span>
+      <i class="ti ti-chevron-down" id="room1-chev" style="font-size:14px; color:var(--color-text-tertiary); transition:transform 0.2s;" aria-hidden="true"></i>
+    </div>
+    <div class="room-detail" id="room1-detail">
+      <div class="detail-section"><div class="detail-section-title"><i class="ti ti-eye" aria-hidden="true"></i> Atmosphere</div><p>Wet earth and copper smell. Dripping water echoes. Torchlight barely reaches the bottom.</p></div>
+      <div class="detail-section"><div class="detail-section-title"><i class="ti ti-alert-triangle" aria-hidden="true"></i> Challenge</div><p>Algae-slick stairs — <span class="dc-pill">DC 12 Athletics or Acrobatics</span> or slide down, arriving prone (1d4 bludgeoning). A rope anchored above grants advantage.</p></div>
+      <div class="detail-section"><div class="detail-section-title"><i class="ti ti-sword" aria-hidden="true"></i> Combat</div><p>Two <strong>Giant Frogs</strong> in the flooded landing pool. They prioritize prone targets for Swallow.</p></div>
+    </div>
+
+    <div id="room2-btn" class="room-btn" onclick="toggleRoom(2)">
+      <div class="room-num" style="background:#E6F1FB; color:#185FA5; font-weight:500;">2</div>
+      <span class="room-name"><i class="ti ti-building-arch" style="font-size:14px; margin-right:4px;" aria-hidden="true"></i>Hall of Offerings</span>
+      <span class="room-tag badge-info">Puzzle + Combat</span>
+      <i class="ti ti-chevron-down" id="room2-chev" style="font-size:14px; color:var(--color-text-tertiary); transition:transform 0.2s;" aria-hidden="true"></i>
+    </div>
+    <div class="room-detail" id="room2-detail">
+      <div class="detail-section"><div class="detail-section-title"><i class="ti ti-eye" aria-hidden="true"></i> Atmosphere</div><p>Carved stone shelves with clay pots and corroded coins. A low hum — water vibrating through hidden pipes, almost like chanting.</p></div>
+      <div class="detail-section"><div class="detail-section-title"><i class="ti ti-alert-triangle" aria-hidden="true"></i> Pressure plate floor</div><p>Land animal tiles = dart trap. <span class="dc-pill">DC 13 Perception</span> to spot. <span class="dc-pill">DC 14 Dex save</span> or 2d6 piercing. Water creature tiles are safe. <span class="dc-pill">DC 14 Religion/History</span> to identify.</p></div>
+      <div class="detail-section"><div class="detail-section-title"><i class="ti ti-sword" aria-hidden="true"></i> Combat</div><p>Three <strong>Mud Mephits</strong> rise from collapsed floor sections as ancient guardians.</p></div>
+      <div style="font-size:12px; color:var(--color-text-warning); margin-top:4px;"><i class="ti ti-clock" aria-hidden="true"></i> <strong>Skip tip:</strong> If running short on time, describe this room as "already disturbed — pots shattered, plates triggered long ago." Jump straight to Room 3.</div>
+    </div>
+
+    <div id="room3-btn" class="room-btn" onclick="toggleRoom(3)">
+      <div class="room-num" style="background:#FCEBEB; color:#A32D2D; font-weight:500;">3</div>
+      <span class="room-name"><i class="ti ti-settings" style="font-size:14px; margin-right:4px;" aria-hidden="true"></i>The Clogged Valve</span>
+      <span class="room-tag badge-danger">Time Pressure!</span>
+      <i class="ti ti-chevron-down" id="room3-chev" style="font-size:14px; color:var(--color-text-tertiary); transition:transform 0.2s;" aria-hidden="true"></i>
+    </div>
+    <div class="room-detail" id="room3-detail">
+      <div class="detail-section"><div class="detail-section-title"><i class="ti ti-eye" aria-hidden="true"></i> Atmosphere</div><p>Pressurized silence — the feeling of something about to burst. Air tastes metallic.</p></div>
+      <div class="detail-section"><div class="detail-section-title"><i class="ti ti-alert-triangle" aria-hidden="true"></i> The Valve Puzzle</div><p>Marta's idol jams the valve. <span class="dc-pill">DC 15 Strength</span> brute force OR <span class="dc-pill">DC 13 Investigation</span> to find the latch. Marta's map = auto-success. Forcing it without removing the idol: 2d6 bludgeoning, all prone.</p></div>
+      <div class="detail-section"><div class="detail-section-title" style="color:#A32D2D;"><i class="ti ti-clock" aria-hidden="true"></i> Time Pressure — 3 Rounds!</div><p>Ceiling cracks. After 3 rounds: partial collapse deals 3d6 damage. <span class="dc-pill">DC 14 Dex save</span> for half. No enemies — let the environment be the threat.</p></div>
+    </div>
+
+    <div id="room4-btn" class="room-btn" onclick="toggleRoom(4)">
+      <div class="room-num" style="background:#EEEDFE; color:#534AB7; font-weight:500;">4</div>
+      <span class="room-name"><i class="ti ti-eye" style="font-size:14px; margin-right:4px;" aria-hidden="true"></i>The Inner Sanctum</span>
+      <span class="room-tag" style="background:#EEEDFE; color:#534AB7; border-radius:20px;">Boss Room</span>
+      <i class="ti ti-chevron-down" id="room4-chev" style="font-size:14px; color:var(--color-text-tertiary); transition:transform 0.2s;" aria-hidden="true"></i>
+    </div>
+    <div class="room-detail" id="room4-detail">
+      <div class="detail-section"><div class="detail-section-title"><i class="ti ti-eye" aria-hidden="true"></i> Atmosphere</div><p>Eerie stillness. Domed, bone-dry chamber. A stone idol of a bloated frog-like deity on a throne of river rock. Its polished-stone eyes seem to follow the party.</p></div>
+      <div class="detail-section"><div class="detail-section-title"><i class="ti ti-message" aria-hidden="true"></i> Inscription</div><div class="read-aloud" style="margin-top:4px; margin-bottom:0;">"Return what was taken freely, or be taken in return."</div></div>
+      <div class="detail-section"><div class="detail-section-title"><i class="ti ti-check" aria-hidden="true"></i> Resolution</div><p>Place a personal or magical item in the offering bowl → spring is restored. Coins alone won't work.</p></div>
+      <div class="detail-section"><div class="detail-section-title" style="color:#A32D2D;"><i class="ti ti-sword" aria-hidden="true"></i> If they refuse or disrespect</div><p>The <strong>Keeper of the Tithe</strong> awakens. See Combat tab.</p></div>
+    </div>
+  </div>
+
+  <!-- COMBAT -->
+  <div class="panel" id="panel-combat">
+    <!-- Giant Frog -->
+    <div class="stat-block">
+      <div class="stat-header">
+        <div>
+          <div class="enemy-name">Giant Frog</div>
+          <div style="font-size:12px; color:var(--color-text-secondary);">Room 1 · 2 encountered</div>
+        </div>
+        <div style="margin-left:auto;" id="frog-reset-btn">
+          <button class="flavor-btn" onclick="resetHP('frog1',18); resetHP('frog2',18)"><i class="ti ti-refresh" aria-hidden="true"></i> Reset both</button>
+        </div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-cell"><div class="stat-cell-label">HP</div><div class="stat-cell-val">18</div></div>
+        <div class="stat-cell"><div class="stat-cell-label">AC</div><div class="stat-cell-val">11</div></div>
+        <div class="stat-cell"><div class="stat-cell-label">Speed</div><div class="stat-cell-val" style="font-size:13px; margin-top:4px;">30/Swim 30</div></div>
+        <div class="stat-cell"><div class="stat-cell-label">Atk Bonus</div><div class="stat-cell-val">+3</div></div>
+      </div>
+      <div class="ability-title">Bite</div>
+      <div class="ability-desc">+3 to hit · 1d6+1 piercing. On hit: target is <span class="badge badge-warning">Grappled</span> (DC 11 Str to escape).</div>
+      <div class="ability-title">Swallow <span class="badge badge-danger" style="font-size:10px; margin-left:4px;">Special</span></div>
+      <div class="ability-desc">If already grappled: swallows target. <span class="badge badge-danger">Blinded + Restrained</span> · 2d4 acid/turn · DC 12 Str to escape.</div>
+      <div style="display:flex; gap:16px; flex-wrap:wrap; margin-top:4px;">
+        <div class="hp-tracker">
+          <span class="hp-label">Frog A</span>
+          <button class="hp-btn" onclick="adjustHP('frog1',-1)">−</button>
+          <span class="hp-display" id="frog1">18</span>
+          <button class="hp-btn" onclick="adjustHP('frog1',1)">+</button>
+          <input class="hp-input" id="frog1-in" type="number" placeholder="set">
+          <button class="hp-set-btn" onclick="setHP('frog1')">Set</button>
+        </div>
+        <div class="hp-tracker">
+          <span class="hp-label">Frog B</span>
+          <button class="hp-btn" onclick="adjustHP('frog2',-1)">−</button>
+          <span class="hp-display" id="frog2">18</span>
+          <button class="hp-btn" onclick="adjustHP('frog2',1)">+</button>
+          <input class="hp-input" id="frog2-in" type="number" placeholder="set">
+          <button class="hp-set-btn" onclick="setHP('frog2')">Set</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mud Mephit -->
+    <div class="stat-block">
+      <div class="stat-header">
+        <div>
+          <div class="enemy-name">Mud Mephit</div>
+          <div style="font-size:12px; color:var(--color-text-secondary);">Room 2 · 3 encountered</div>
+        </div>
+        <div style="margin-left:auto;">
+          <button class="flavor-btn" onclick="resetHP('meph1',27); resetHP('meph2',27); resetHP('meph3',27)"><i class="ti ti-refresh" aria-hidden="true"></i> Reset all</button>
+        </div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-cell"><div class="stat-cell-label">HP</div><div class="stat-cell-val">27</div></div>
+        <div class="stat-cell"><div class="stat-cell-label">AC</div><div class="stat-cell-val">11</div></div>
+        <div class="stat-cell"><div class="stat-cell-label">Speed</div><div class="stat-cell-val" style="font-size:13px; margin-top:4px;">25/Fly 20</div></div>
+        <div class="stat-cell"><div class="stat-cell-label">Atk Bonus</div><div class="stat-cell-val">+3</div></div>
+      </div>
+      <div class="ability-title">Claws</div>
+      <div class="ability-desc">+3 to hit · 1d4+1 slashing.</div>
+      <div class="ability-title">Mud Breath <span class="badge badge-info" style="font-size:10px; margin-left:4px;">Recharge 6</span></div>
+      <div class="ability-desc">15-ft cone · DC 11 Dex save or <span class="badge badge-warning">Restrained</span> until end of next turn.</div>
+      <div class="ability-title">Death Burst <span class="badge badge-neutral" style="font-size:10px; margin-left:4px;">On death</span></div>
+      <div class="ability-desc">Explodes in mud — all adjacent creatures: DC 11 Dex save or <span class="badge badge-danger">Blinded</span> until they use an action to wipe clean.</div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:4px;">
+        <div class="hp-tracker"><span class="hp-label">A</span><button class="hp-btn" onclick="adjustHP('meph1',-1)">−</button><span class="hp-display" id="meph1">27</span><button class="hp-btn" onclick="adjustHP('meph1',1)">+</button><input class="hp-input" id="meph1-in" type="number" placeholder="set"><button class="hp-set-btn" onclick="setHP('meph1')">Set</button></div>
+        <div class="hp-tracker"><span class="hp-label">B</span><button class="hp-btn" onclick="adjustHP('meph2',-1)">−</button><span class="hp-display" id="meph2">27</span><button class="hp-btn" onclick="adjustHP('meph2',1)">+</button><input class="hp-input" id="meph2-in" type="number" placeholder="set"><button class="hp-set-btn" onclick="setHP('meph2')">Set</button></div>
+        <div class="hp-tracker"><span class="hp-label">C</span><button class="hp-btn" onclick="adjustHP('meph3',-1)">−</button><span class="hp-display" id="meph3">27</span><button class="hp-btn" onclick="adjustHP('meph3',1)">+</button><input class="hp-input" id="meph3-in" type="number" placeholder="set"><button class="hp-set-btn" onclick="setHP('meph3')">Set</button></div>
+      </div>
+    </div>
+
+    <!-- Keeper -->
+    <div class="stat-block" style="border-color: #AFA9EC;">
+      <div class="stat-header">
+        <div>
+          <div class="enemy-name">The Keeper of the Tithe <span class="badge" style="background:#EEEDFE; color:#534AB7; margin-left:6px;">Final Boss</span></div>
+          <div style="font-size:12px; color:var(--color-text-secondary);">Room 4 · Awakens if party disrespects sanctum</div>
+        </div>
+        <div style="margin-left:auto;">
+          <button class="flavor-btn" onclick="resetHP('keeper',65)"><i class="ti ti-refresh" aria-hidden="true"></i> Reset</button>
+        </div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-cell"><div class="stat-cell-label">HP</div><div class="stat-cell-val">65</div></div>
+        <div class="stat-cell"><div class="stat-cell-label">AC</div><div class="stat-cell-val">14</div></div>
+        <div class="stat-cell"><div class="stat-cell-label">Speed</div><div class="stat-cell-val" style="font-size:13px; margin-top:4px;">30/Swim 50</div></div>
+        <div class="stat-cell"><div class="stat-cell-label">Attacks</div><div class="stat-cell-val">2</div></div>
+      </div>
+      <div class="ability-title">Slam <span class="badge badge-neutral" style="font-size:10px;">Multiattack</span></div>
+      <div class="ability-desc">+5 to hit · 2d6+3 bludgeoning.</div>
+      <div class="ability-title">Tongue Lash</div>
+      <div class="ability-desc">+5 to hit · 10-ft reach · 1d8+3 damage. Target is <strong>pulled 10 ft toward</strong> the Keeper.</div>
+      <div class="ability-title">Tidal Surge <span class="badge badge-danger" style="font-size:10px; margin-left:4px;">1/day</span></div>
+      <div class="ability-desc">Slams ground — all within 20 ft: <span class="dc-pill">DC 14 Str save</span> or knocked prone + pushed 10 ft. Keeper then moves up to full speed for free.</div>
+      <div class="ability-title" style="color:#3B6D11;"><i class="ti ti-heart" aria-hidden="true"></i> Weakness</div>
+      <div class="ability-desc">If the gold idol is placed in the offering bowl mid-combat (costs an action): the Keeper <strong>loses Multiattack</strong> until the end of its next turn.</div>
+      <div class="hp-tracker" style="margin-top:8px;">
+        <span class="hp-label">The Keeper</span>
+        <button class="hp-btn" onclick="adjustHP('keeper',-1)">−</button>
+        <span class="hp-display" id="keeper">65</span>
+        <button class="hp-btn" onclick="adjustHP('keeper',1)">+</button>
+        <input class="hp-input" id="keeper-in" type="number" placeholder="set">
+        <button class="hp-set-btn" onclick="setHP('keeper')">Set</button>
+      </div>
+      <div style="font-size:12px; color:var(--color-text-secondary); margin-top:8px; padding-top:8px; border-top: 0.5px solid var(--color-border-tertiary);"><strong>Short on time?</strong> Cut HP to 40 and remove Tidal Surge. Story still lands.</div>
+    </div>
+  </div>
+
+  <!-- LOOT -->
+  <div class="panel" id="panel-loot">
+    <div class="loot-grid">
+      <div class="loot-card">
+        <div style="font-size:20px; margin-bottom:6px;"><i class="ti ti-currency-dollar" aria-hidden="true"></i></div>
+        <div class="loot-name">The Tithe Idol</div>
+        <div class="loot-desc">Worth 75 gp to a collector. But Marta will cry if they sell it. Returning it unlocks Marta's reward.</div>
+        <div class="loot-note">Reward for return: Her husband's journal + crude map to a nearby ruin. Great next-session hook.</div>
+      </div>
+      <div class="loot-card">
+        <div style="font-size:20px; margin-bottom:6px;"><i class="ti ti-eye" aria-hidden="true"></i></div>
+        <div class="loot-name">Keeper's Eye</div>
+        <div class="loot-desc">Polished river-stone eye from the throne. Arcane Focus for druids or clerics.</div>
+        <div style="margin-top:8px; font-size:12px; font-weight:500; color: var(--color-text-secondary);">Property</div>
+        <div class="loot-desc">1/long rest: Cast Shape Water (cantrip) for free. Always warm and slightly damp.</div>
+      </div>
+      <div class="loot-card">
+        <div style="font-size:20px; margin-bottom:6px;"><i class="ti ti-bowl" aria-hidden="true"></i></div>
+        <div class="loot-name">The Offering Bowl</div>
+        <div class="loot-desc">Ancient engraved bronze bowl. Any liquid poured in is purified (removes poison and disease) and faintly blessed. Holds 1 pint.</div>
+        <div class="loot-note">Fragile: any damage cracks it and removes the power. Weighs 2 lbs.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIPS -->
+  <div class="panel" id="panel-tips">
+    <div class="tip-card">
+      <div class="tip-header"><i class="ti ti-puzzle" style="font-size:18px; color:var(--color-text-info);" aria-hidden="true"></i><div class="tip-title">Players stuck on a puzzle?</div></div>
+      <div class="tip-body">
+        <ul>
+          <li>Have Dag Ironboot's voice echo from above: <em>"Did ye find the latch yet?!"</em></li>
+          <li>Still stuck? A wandering Giant Frog bursts through a wall, shatters a clue into plain sight, and makes the solution obvious through chaos. Use destruction as a hint machine.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-header"><i class="ti ti-clock" style="font-size:18px; color:var(--color-text-warning);" aria-hidden="true"></i><div class="tip-title">Running out of time?</div></div>
+      <div class="tip-body">
+        <ul>
+          <li>Skip Room 2 (Hall of Offerings) entirely — describe it as "already disturbed, pots shattered, plates triggered long ago." Jump straight to the Valve.</li>
+          <li>Cut the Keeper's HP to 40 and remove Tidal Surge. The story still lands — just tighter.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-header"><i class="ti ti-mood-empty" style="font-size:18px; color:var(--color-text-danger);" aria-hidden="true"></i><div class="tip-title">Party bored or disengaged?</div></div>
+      <div class="tip-body">
+        <ul>
+          <li>Drop in <strong>Pell Quickwick</strong> — a halfling explorer hiding on a ledge in the Hall of Offerings, starving, with one useful clue and one wild theory. Instant energy. Let him be funny, panicked, or both.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-header"><i class="ti ti-dice" style="font-size:18px; color:var(--color-text-secondary);" aria-hidden="true"></i><div class="tip-title">Quick DC reference</div></div>
+      <div class="tip-body" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:4px;">
+        <span class="dc-pill">DC 12 — Descent stairs</span>
+        <span class="dc-pill">DC 13 — Mosaic spot / Valve latch</span>
+        <span class="dc-pill">DC 14 — Mosaic id / Dex collapse / Keeper Str</span>
+        <span class="dc-pill">DC 15 — Valve brute force</span>
+        <span class="dc-pill">DC 11 — Frog grapple / Mephit saves</span>
+        <span class="dc-pill">DC 12 — Frog swallow escape</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showTab(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+const hpState = {};
+
+function getHP(id) {
+  if (hpState[id] === undefined) {
+    const el = document.getElementById(id);
+    hpState[id] = parseInt(el ? el.textContent : 0);
+  }
+  return hpState[id];
+}
+
+function renderHP(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const v = hpState[id];
+  el.textContent = v;
+  el.style.color = v <= 0 ? 'var(--color-text-danger)' : v <= 8 ? 'var(--color-text-warning)' : 'var(--color-text-primary)';
+}
+
+function adjustHP(id, delta) {
+  hpState[id] = Math.max(0, getHP(id) + delta);
+  renderHP(id);
+}
+
+function setHP(id) {
+  const input = document.getElementById(id + '-in');
+  const v = parseInt(input.value);
+  if (!isNaN(v)) { hpState[id] = Math.max(0, v); renderHP(id); input.value = ''; }
+}
+
+function resetHP(id, max) {
+  hpState[id] = max;
+  renderHP(id);
+}
+
+function toggleRoom(n) {
+  const detail = document.getElementById('room' + n + '-detail');
+  const btn = document.getElementById('room' + n + '-btn');
+  const chev = document.getElementById('room' + n + '-chev');
+  const open = detail.classList.contains('open');
+  detail.classList.toggle('open', !open);
+  btn.classList.toggle('open', !open);
+  chev.style.transform = open ? '' : 'rotate(180deg)';
+}
+</script>
